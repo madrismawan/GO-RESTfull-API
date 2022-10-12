@@ -32,7 +32,7 @@ func (r *OrderRepo) CreateOrder(ctx *gin.Context) {
 	if err != nil {
 		errors := helper.FormatValidationError(err)
 		errorMessage := gin.H{"errors": errors}
-		response := helper.APIResponse("Bad Request", http.StatusUnprocessableEntity, "error", errorMessage)
+		response := helper.APIResponse("Bad Request", http.StatusBadRequest, "error", errorMessage)
 		ctx.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
@@ -71,14 +71,18 @@ func (r *OrderRepo) UpdateOrder(ctx *gin.Context) {
 	ctx.ShouldBindJSON(&order)
 	errInput := validate.Struct(order)
 	if errInput != nil {
-		errors := helper.FormatValidationError(err)
+		errors := helper.FormatValidationError(errInput)
 		errorMessage := gin.H{"errors": errors}
-		response := helper.APIResponse("Bad Request", http.StatusUnprocessableEntity, "error", errorMessage)
+		response := helper.APIResponse("Bad Request", http.StatusBadRequest, "error", errorMessage)
 		ctx.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
 
-	r.DB.Save(&order)
+	errParent := r.DB.Save(&order).Error
+	if errParent != nil {
+		ctx.JSON(http.StatusUnprocessableEntity, err)
+		return
+	}
 	errPivot := r.DB.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&order).Error
 	if errPivot != nil {
 		ctx.JSON(http.StatusUnprocessableEntity, err)
@@ -91,15 +95,15 @@ func (r *OrderRepo) UpdateOrder(ctx *gin.Context) {
 func (r *OrderRepo) DeleteOrder(ctx *gin.Context) {
 	var order models.Order
 	id := ctx.Param("id")
-	// err := r.DB.First(&order, id).Error
-	err := r.DB.Where("order_id = ?", id).Delete(&order).Error
+	err := r.DB.First(&order, id).Error
+	// err := r.DB.Where("order_id = ?", id).Delete(&order)
 	if err != nil {
 		response := helper.APIResponse("Not found ", http.StatusNotFound, "error", nil)
 		ctx.JSON(http.StatusBadRequest, response)
 		return
 	}
-	// r.DB.Delete(&order)
 	r.DB.Model(&order).Association("Items").Clear()
+	r.DB.Delete(&order)
 
 	response := helper.APIResponse("Successfully delete order", http.StatusOK, "success", nil)
 	ctx.JSON(http.StatusOK, response)

@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type Order struct {
 	OrderId      uint      `gorm:"primaryKey; autoIncrement"`
