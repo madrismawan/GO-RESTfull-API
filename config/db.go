@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"example/main.go/models"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -15,6 +17,6 @@ func DBInit() *gorm.DB {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	// db.Debug().AutoMigrate(models.Item{}, models.Order{})
+	db.Debug().AutoMigrate(models.Item{}, models.Order{})
 	return db
 }

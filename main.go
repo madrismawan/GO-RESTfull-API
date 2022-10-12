@@ -1,8 +1,8 @@
 package main
 
 import (
-	"example/Tugas/config"
-	"example/Tugas/handler"
+	"example/main.go/config"
+	"example/main.go/handler"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,7 +15,7 @@ func main() {
 	route.GET("/order/:id", repoOrder.FindById)
 
 	route.POST("/order", repoOrder.CreateOrder)
-	route.PUT("/order/:id", repoOrder.CreateOrder)
-	route.DELETE("/order/:id", repoOrder.CreateOrder)
+	route.PUT("/order/:id", repoOrder.UpdateOrder)
+	route.DELETE("/order/:id", repoOrder.DeleteOrder)
 	route.Run(":8080")
 }

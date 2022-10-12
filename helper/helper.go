@@ -1,22 +1,8 @@
 package helper
 
 import (
-	"time"
-
 	"github.com/go-playground/validator/v10"
 )
-
-type ItemInput struct {
-	ItemCode    string `json:"itemCode"`
-	Description string `json:"description"`
-	Quantity    int    `json:"quantity"`
-}
-
-type OrderInput struct {
-	CustomerName string      `json:"customerName"`
-	OrderedAt    time.Time   `json:"orderedAt"`
-	Items        []ItemInput `json:"Items"`
-}
 
 type Meta struct {
 	Message string `json:"message"`
@@ -29,6 +15,9 @@ type Response struct {
 	Data interface{} `json:"data"`
 }
 
+// use a single instance of Validate, it caches struct info
+var validate *validator.Validate
+
 func APIResponse(message string, code int, status string, data interface{}) Response {
 	meta := Meta{
 		Message: message,
@@ -40,7 +29,6 @@ func APIResponse(message string, code int, status string, data interface{}) Resp
 		Meta: meta,
 		Data: data,
 	}
-
 	return jsonResponse
 }
 
